@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="css/estilos.css">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Mapa Electoral 2016</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="data/Poblacin_1.js"></script>
+        <script src="data/Porcentajedevotos_2.js"></script>
+        <script src="data/Listanominal_3.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#f9f871',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#f9f871',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:19, minZoom:5
+        }).fitBounds([[19.548137960863247,-99.98982640627119],[21.44814091605979,-97.85464393219019]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_CartoPositron_0');
+        map.getPane('pane_CartoPositron_0').style.zIndex = 400;
+        var layer_CartoPositron_0 = L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+            pane: 'pane_CartoPositron_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 5,
+            maxZoom: 19,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_CartoPositron_0;
+        map.addLayer(layer_CartoPositron_0);
+        function pop_Poblacin_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Municipio</p>' + (feature.properties['NOM_MUN'] !== null ? autolinker.link(feature.properties['NOM_MUN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Población</p>' + (feature.properties['_Pob_INEGI_2015'] !== null ? autolinker.link(feature.properties['_Pob_INEGI_2015'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Lista nominal</p>' + (feature.properties['_Lista_nominal_2016'] !== null ? autolinker.link(feature.properties['_Lista_nominal_2016'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Porcentaje de votos</p>' + (feature.properties['_Porcentaje'] !== null ? autolinker.link(feature.properties['_Porcentaje'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Poblacin_1_0(feature) {
+            if (feature.properties['_Pob_INEGI_2015'] >= 2600.000000 && feature.properties['_Pob_INEGI_2015'] <= 27000.000000 ) {
+                return {
+                pane: 'pane_Poblacin_1',
+                opacity: 1,
+                color: 'rgba(175,174,176,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,219,194,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Pob_INEGI_2015'] >= 27000.000000 && feature.properties['_Pob_INEGI_2015'] <= 58000.000000 ) {
+                return {
+                pane: 'pane_Poblacin_1',
+                opacity: 1,
+                color: 'rgba(175,174,176,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,198,156,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Pob_INEGI_2015'] >= 58000.000000 && feature.properties['_Pob_INEGI_2015'] <= 161000.000000 ) {
+                return {
+                pane: 'pane_Poblacin_1',
+                opacity: 1,
+                color: 'rgba(175,174,176,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,177,119,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Pob_INEGI_2015'] >= 161000.000000 && feature.properties['_Pob_INEGI_2015'] <= 278000.000000 ) {
+                return {
+                pane: 'pane_Poblacin_1',
+                opacity: 1,
+                color: 'rgba(175,174,176,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,155,81,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_Poblacin_1');
+        map.getPane('pane_Poblacin_1').style.zIndex = 401;
+        map.getPane('pane_Poblacin_1').style['mix-blend-mode'] = 'normal';
+        var layer_Poblacin_1 = new L.geoJson(json_Poblacin_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Poblacin_1',
+            layerName: 'layer_Poblacin_1',
+            pane: 'pane_Poblacin_1',
+            onEachFeature: pop_Poblacin_1,
+            style: style_Poblacin_1_0,
+        });
+        bounds_group.addLayer(layer_Poblacin_1);
+        function pop_Porcentajedevotos_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Municipio</p>' + (feature.properties['NOM_MUN'] !== null ? autolinker.link(feature.properties['NOM_MUN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Población</p>' + (feature.properties['_Pob_INEGI_2015'] !== null ? autolinker.link(feature.properties['_Pob_INEGI_2015'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Lista nominal</p>' + (feature.properties['_Lista_nominal_2016'] !== null ? autolinker.link(feature.properties['_Lista_nominal_2016'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Porcentaje de votos</p>' + (feature.properties['_Porcentaje'] !== null ? autolinker.link(feature.properties['_Porcentaje'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        var pattern_Porcentajedevotos_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#e6deff',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Porcentajedevotos_2_0.addTo(map);
+        var pattern_Porcentajedevotos_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#c3bbe3',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Porcentajedevotos_2_0.addTo(map);
+        var pattern_Porcentajedevotos_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#9f97c6',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Porcentajedevotos_2_0.addTo(map);
+        var pattern_Porcentajedevotos_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#7b73aa',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Porcentajedevotos_2_0.addTo(map);
+        var pattern_Porcentajedevotos_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#58508d',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Porcentajedevotos_2_0.addTo(map);
+        function style_Porcentajedevotos_2_0(feature) {
+            if (feature.properties['_Porcentaje'] >= 0.500000 && feature.properties['_Porcentaje'] <= 0.600000 ) {
+                return {
+                pane: 'pane_Porcentajedevotos_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Porcentajedevotos_2_0,
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Porcentaje'] >= 0.600000 && feature.properties['_Porcentaje'] <= 0.700000 ) {
+                return {
+                pane: 'pane_Porcentajedevotos_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Porcentajedevotos_2_0,
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Porcentaje'] >= 0.700000 && feature.properties['_Porcentaje'] <= 0.800000 ) {
+                return {
+                pane: 'pane_Porcentajedevotos_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Porcentajedevotos_2_0,
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Porcentaje'] >= 0.800000 && feature.properties['_Porcentaje'] <= 0.900000 ) {
+                return {
+                pane: 'pane_Porcentajedevotos_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Porcentajedevotos_2_0,
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Porcentaje'] >= 0.900000 && feature.properties['_Porcentaje'] <= 1.000000 ) {
+                return {
+                pane: 'pane_Porcentajedevotos_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Porcentajedevotos_2_0,
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_Porcentajedevotos_2');
+        map.getPane('pane_Porcentajedevotos_2').style.zIndex = 402;
+        map.getPane('pane_Porcentajedevotos_2').style['mix-blend-mode'] = 'normal';
+        var layer_Porcentajedevotos_2 = new L.geoJson(json_Porcentajedevotos_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Porcentajedevotos_2',
+            layerName: 'layer_Porcentajedevotos_2',
+            pane: 'pane_Porcentajedevotos_2',
+            onEachFeature: pop_Porcentajedevotos_2,
+            style: style_Porcentajedevotos_2_0,
+        });
+        bounds_group.addLayer(layer_Porcentajedevotos_2);
+        function pop_Listanominal_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Municipio</p>' + (feature.properties['NOM_MUN'] !== null ? autolinker.link(feature.properties['NOM_MUN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Población</p>' + (feature.properties['_Pob_INEGI_2015'] !== null ? autolinker.link(feature.properties['_Pob_INEGI_2015'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Lista nominal</p>' + (feature.properties['_Lista_nominal_2016'] !== null ? autolinker.link(feature.properties['_Lista_nominal_2016'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><p class="nombre">Porcentaje de votos</p>' + (feature.properties['_Porcentaje'] !== null ? autolinker.link(feature.properties['_Porcentaje'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Listanominal_3_0(feature) {
+            if (feature.properties['_Lista_nominal_2016'] >= 2000.000000 && feature.properties['_Lista_nominal_2016'] <= 10000.000000 ) {
+                return {
+                pane: 'pane_Listanominal_3',
+                radius: 8.0,
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(47,72,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Lista_nominal_2016'] >= 10000.000000 && feature.properties['_Lista_nominal_2016'] <= 20000.000000 ) {
+                return {
+                pane: 'pane_Listanominal_3',
+                radius: 10.5,
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(47,72,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Lista_nominal_2016'] >= 20000.000000 && feature.properties['_Lista_nominal_2016'] <= 57000.000000 ) {
+                return {
+                pane: 'pane_Listanominal_3',
+                radius: 13.0,
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(47,72,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Lista_nominal_2016'] >= 57000.000000 && feature.properties['_Lista_nominal_2016'] <= 118000.000000 ) {
+                return {
+                pane: 'pane_Listanominal_3',
+                radius: 15.5,
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(47,72,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['_Lista_nominal_2016'] >= 118000.000000 && feature.properties['_Lista_nominal_2016'] <= 216000.000000 ) {
+                return {
+                pane: 'pane_Listanominal_3',
+                radius: 18.0,
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(47,72,88,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_Listanominal_3');
+        map.getPane('pane_Listanominal_3').style.zIndex = 403;
+        map.getPane('pane_Listanominal_3').style['mix-blend-mode'] = 'normal';
+        var layer_Listanominal_3 = new L.geoJson(json_Listanominal_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Listanominal_3',
+            layerName: 'layer_Listanominal_3',
+            pane: 'pane_Listanominal_3',
+            onEachFeature: pop_Listanominal_3,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Listanominal_3_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Listanominal_3);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>Mapa Electoral 2016</h2>';
+            };
+            title.addTo(map);
+            var abstract = new L.Control({'position':'bottomleft'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+
+                    abstract.show();
+                    return this._div;
+                };
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = 'Este es un mapa interactivo que nos muestra información extraida del INEGI y del INEE';
+            };
+            abstract.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'Lista nominal<br /><table><tr><td style="text-align: center;"><img src="legend/Listanominal_3_2000100000.png" /></td><td>2000 - 10000</td></tr><tr><td style="text-align: center;"><img src="legend/Listanominal_3_10000200001.png" /></td><td>10000 - 20000</td></tr><tr><td style="text-align: center;"><img src="legend/Listanominal_3_20000570002.png" /></td><td>20000 - 57000</td></tr><tr><td style="text-align: center;"><img src="legend/Listanominal_3_570001180003.png" /></td><td>57000 - 118000</td></tr><tr><td style="text-align: center;"><img src="legend/Listanominal_3_1180002160004.png" /></td><td>118000 - 216000</td></tr></table>': layer_Listanominal_3,'Porcentaje de votos<br /><table><tr><td style="text-align: center;"><img src="legend/Porcentajedevotos_2_50600.png" /></td><td>50% - 60%</td></tr><tr><td style="text-align: center;"><img src="legend/Porcentajedevotos_2_60701.png" /></td><td>60% - 70%</td></tr><tr><td style="text-align: center;"><img src="legend/Porcentajedevotos_2_70802.png" /></td><td>70% - 80%</td></tr><tr><td style="text-align: center;"><img src="legend/Porcentajedevotos_2_80903.png" /></td><td>80% - 90%</td></tr><tr><td style="text-align: center;"><img src="legend/Porcentajedevotos_2_901004.png" /></td><td>90% - 100%</td></tr></table>': layer_Porcentajedevotos_2,'Población<br /><table><tr><td style="text-align: center;"><img src="legend/Poblacin_1_2600270000.png" /></td><td>2600 - 27000</td></tr><tr><td style="text-align: center;"><img src="legend/Poblacin_1_27000580001.png" /></td><td>27000 - 58000</td></tr><tr><td style="text-align: center;"><img src="legend/Poblacin_1_580001610002.png" /></td><td>58000 - 161000</td></tr><tr><td style="text-align: center;"><img src="legend/Poblacin_1_1610002780003.png" /></td><td>161000 - 278000</td></tr></table>': layer_Poblacin_1,"Carto Positron": layer_CartoPositron_0,}).addTo(map);
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_Poblacin_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'NOM_MUN'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        </script>
+    </body>
+</html>
