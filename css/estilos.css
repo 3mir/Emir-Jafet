@@ -62,7 +62,7 @@ body {
 }
 
 .main .titulo {
-	color: #FF9B51;
+	color: #2F4858;
 	font-size: 25px;
 	font-weight: 500;
 	font-family: 'Roboto', sans-serif;
@@ -87,7 +87,7 @@ body {
 }
 
 .main .mapa{
-	border: 3px solid #e3e3e3;
+	border: 5px solid #88A59F;
 }
 
 .main .widget form input[type="text"] {
